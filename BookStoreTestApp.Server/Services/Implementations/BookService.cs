@@ -1,74 +1,87 @@
 ﻿using BookStoreTestApp.Server.Services.Interfaces;
+using BookStoreTestApp.Server.Requests;
 using BookStoreTestApp.Server.Models;
 using Bogus;
+using System.Collections.Generic;
 
 namespace BookStoreTestApp.Server.Services.Implementations;
 
-public class BookService : IBookService
+public class BookService() : IBookService
 {
-	private readonly Random _random = new();
-	private readonly Faker<Book> _bookFaker;
-
-	public BookService()
+	public List<Book> GenerateBooks(BookRequest request)
 	{
-		_bookFaker = new Faker<Book>()
-			.RuleFor(b => b.ISBN, f => f.Random.AlphaNumeric(10))
+		var bookFaker = new Faker<Book>(request.Region)
+			.RuleFor(b => b.ISBN, f => f.Random.Bool() ? 
+				$"978-{f.Random.Number(10, 99)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(0, 9)}"
+				: $"{f.Random.Number(1, 9)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(0, 9)}")
 			.RuleFor(b => b.Title, f => f.Lorem.Sentence())
-			.RuleFor(b => b.Authors, f => GenerateAuthors())
 			.RuleFor(b => b.Publisher, f => f.Company.CompanyName())
+			.RuleFor(b => b.Authors, f => [.. 
+				Enumerable.Range(1, f.Random.Int(1, 3))
+				.Select(_ => f.Name.FullName())])
 			.RuleFor(b => b.Reviews, f => []);
+
+		int startIndex = request.PageSize * request.Page;
+
+		List<Book> books = [];
+		for (int i = 0; i < request.PageSize; i++)
+		{
+			int index = startIndex + i + 1;
+			int seed = $"{request.Seed}-{index}".GetHashCode();
+			bookFaker.UseSeed(seed);
+			Book book = bookFaker.Generate();
+			book.Index = index;
+			book.Likes = GenerateLikes(seed, request.LikesAvg);
+			book.Reviews = GenerateReviews(seed, request.Region, request.ReviewsAvg);
+			books.Add(book);
+		}
+		return books;
 	}
 
-
-	private List<string> GenerateAuthors()
+	private static int GenerateLikes(int seed, double avg)
 	{
-		var faker = new Faker();
-		int numberOfAuthors = _random.Next(1, 4);
-		var authors = new List<string>();
+		var random = new Random(seed);
 
-		for (int i = 0; i < numberOfAuthors; i++)
+		if (Math.Floor(avg) == avg)
 		{
-			authors.Add(faker.Name.FullName());
+			return (int)Math.Floor(avg);
 		}
 
-		return authors;
+		var intPart = (int)Math.Floor(avg);
+		var fractPart = avg - intPart;
+		var likes = intPart;
+
+		if (random.NextDouble() < fractPart)
+		{
+			likes += 1;
+		}
+
+		return likes;
 	}
 
-	public List<Book> GenerateBooks(int count, double averageLikes, double averageReviews) =>
-		[.. _bookFaker.Generate(count).Select((book, index) =>
-			{
-				book.Index = index + 1;
-				book.Reviews = GenerateReviews(averageLikes, averageReviews);
-				return book;
-			})
-		];
 
-
-	private List<Review> GenerateReviews(double averageLikes, double averageReviews)
+	private List<Review> GenerateReviews(int seed, string region, double averageReviews)
 	{
-		var reviews = new List<Review>();
+		Random rnd = new(seed);
+		var faker = new Faker<Review>()
+			.RuleFor(b => b.Text, f => f.Lorem.Sentence(10))
+			.RuleFor(b => b.Reviewer, f => f.Name.FullName())
+			.UseSeed(seed);
+
+		List<Review> reviews = [];
 		int numberOfReviews = (int)Math.Floor(averageReviews); 
 
 		for (int i = 0; i < numberOfReviews; i++)
 		{
-			reviews.Add(CreateRandomReview());
+			reviews.Add(faker.Generate());
 		}
 
 		double fractionalPart = averageReviews - numberOfReviews;
-		if (fractionalPart > 0 && _random.NextDouble() < fractionalPart)
+		if (fractionalPart > 0 && rnd.NextDouble() < fractionalPart)
 		{
-			reviews.Add(CreateRandomReview());
+			reviews.Add(faker.Generate());
 		}
 
 		return reviews;
-	}
-
-	private Review CreateRandomReview()
-	{
-		return new Review
-		{
-			Text = new Faker().Lorem.Sentence(10),
-			Reviewer = new Faker().Name.FullName()
-		};
 	}
 }

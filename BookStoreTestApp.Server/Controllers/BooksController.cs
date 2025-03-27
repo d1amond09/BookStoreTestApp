@@ -1,4 +1,5 @@
 ﻿using BookStoreTestApp.Server.Models;
+using BookStoreTestApp.Server.Requests;
 using BookStoreTestApp.Server.Services.Implementations;
 using BookStoreTestApp.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -13,9 +14,9 @@ public class BooksController(IBookService bookService) : ControllerBase
 	private readonly IBookService _bookService = bookService;
 
 	[HttpGet]
-	public ActionResult<List<Book>> GetBooks(int page, int likes, int reviews)
+	public ActionResult<List<Book>> GetBooks([FromQuery] BookRequest request)
 	{
-		var books = _bookService.GenerateBooks(20, likes, reviews);
+		var books = _bookService.GenerateBooks(request);
 		return Ok(books);
 	}
 }
