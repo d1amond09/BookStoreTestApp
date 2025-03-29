@@ -1,4 +1,5 @@
-﻿using BookStoreTestApp.Server.Models;
+﻿using System.Security.Cryptography;
+using BookStoreTestApp.Server.Models;
 using BookStoreTestApp.Server.Requests;
 using BookStoreTestApp.Server.Services.Implementations;
 using BookStoreTestApp.Server.Services.Interfaces;
@@ -18,5 +19,13 @@ public class BooksController(IBookService bookService) : ControllerBase
 	{
 		var books = _bookService.GenerateBooks(request);
 		return Ok(books);
+	}
+
+	[HttpGet("random-seed")]
+	public ActionResult<int> GetRandomSeed()
+	{
+		var random = new Random();
+		int seed = random.Next(1, int.MaxValue);
+		return Ok(seed);
 	}
 }
