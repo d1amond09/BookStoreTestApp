@@ -6,7 +6,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("CorsPolicy", b => b
+		.AllowAnyOrigin()
+		.AllowAnyMethod()
+		.AllowAnyHeader());
+});
+builder.Services.AddSingleton<IBookService, BookService>();
 
 var app = builder.Build();
 
@@ -20,7 +27,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
+app.UseCors("CorsPolicy");
 app.UseAuthorization();
 
 app.MapControllers();
