@@ -13,7 +13,8 @@ export const App = () => {
     const [hasMore, setHasMore] = useState(true);
     const [expandedIndex, setExpandedIndex] = useState(null);
 
-    const BOOKS_PER_PAGE = 10;
+    const BOOKS_PAGE_SIZE = 10;
+    const BOOKS_INITIAL_SIZE = 20;
 
     const regions = [
         { value: 'en_US', label: 'English (USA)' },
@@ -25,13 +26,12 @@ export const App = () => {
         setBooks([]);
         setPage(1);
         setHasMore(true);
-        fetchBooks(1, BOOKS_PER_PAGE);
-        fetchBooks(2, BOOKS_PER_PAGE);
+        fetchBooks(1, BOOKS_INITIAL_SIZE);
     }, [region, seed, likesAvg, reviewsAvg]);
 
     useEffect(() => {
-        if (page > 1 && hasMore) {
-            fetchBooks(page, BOOKS_PER_PAGE);
+        if (page > 2 && hasMore) {
+            fetchBooks(page, BOOKS_PAGE_SIZE);
         }
     }, [page]);
 
@@ -81,6 +81,24 @@ export const App = () => {
         }
     };
 
+    const fetchRandomSeed = async () => {
+        try {
+            const response = await fetch(`https://localhost:7086/api/books/random-seed`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            setSeed(data);
+        } catch (error) {
+            console.error("Error fetching random seed:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const toggleExpand = (index) => {
         setExpandedIndex(expandedIndex === index ? null : index);
     };
@@ -103,7 +121,7 @@ export const App = () => {
                     </select>
                 </div>
                 <div className="filter">
-                    <label for="seed">
+                    <label >
                         Seed:
                     </label>
                     <input
@@ -113,10 +131,10 @@ export const App = () => {
                         onChange={(e) => setSeed(e.target.value)} />
                 </div>
                 <div className="filter">
-                    <button class="random-button" onclick="">Random Seed</button>
+                    <button className="random-button" onClick={fetchRandomSeed}>Random Seed</button>
                 </div>      
                 <div className="filter">
-                    <label for="likes">
+                    <label >
                         Likes Avg: {likesAvg}
                     </label>
                     <input
@@ -126,57 +144,59 @@ export const App = () => {
                         onChange={(e) => setLikesAvg(parseFloat(e.target.value))} />
                 </div>
                 <div className="filter">
-                    <label for="reviews">
+                    <label >
                         Reviews Avg:
                     </label>
                     <input
                         id="reviews"
                         type="number"
-                        value={reviewsAvg}
+                        value={reviewsAvg} min="0" step="0.1"
                         onChange={(e) => setReviewsAvg(parseFloat(e.target.value))} />
 
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>ISBN</th>
-                        <th>Title</th>
-                        <th>Authors</th>
-                        <th>Publisher</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {books.map((book, index) => (
-                        <React.Fragment key={book.index}>
-                            <tr onClick={() => toggleExpand(index)}>
-                                <td>{book.index}</td>
-                                <td>{book.isbn}</td>
-                                <td>{book.title}</td>
-                                <td>{book.authors.join(", ")}</td>
-                                <td>{book.publisher}</td>
-                            </tr>
-                            {expandedIndex === index && (
-                                <tr>
-                                    <td colSpan="5">
-                                        <div>
-                                            <h3>Likes: {book.likes}</h3>
-                                            <h4>Reviews:</h4>
-                                            {book.reviews.map((review, idx) => (
-                                                <div key={idx}>
-                                                    <strong>{review.reviewer}:</strong> {review.text}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </td>
+            <div className="table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>ISBN</th>
+                            <th>Title</th>
+                            <th>Authors</th>
+                            <th>Publisher</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {books.map((book, index) => (
+                            <React.Fragment key={book.index}>
+                                <tr onClick={() => toggleExpand(index)}>
+                                    <td>{book.index}</td>
+                                    <td>{book.isbn}</td>
+                                    <td>{book.title}</td>
+                                    <td>{book.authors.join(", ")}</td>
+                                    <td>{book.publisher}</td>
                                 </tr>
-                            )}
-                        </React.Fragment>
-                    ))}
-                </tbody>
-            </table>
-            {loading && <p>Loading...</p>}
+                                {expandedIndex === index && (
+                                    <tr>
+                                        <td colSpan="5">
+                                            <div>
+                                                <h3>Likes: {book.likes}</h3>
+                                                <h4>Reviews:</h4>
+                                                {book.reviews.map((review, idx) => (
+                                                    <div key={idx}>
+                                                        <strong>{review.reviewer}:</strong> {review.text}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
+                {loading && <p>Loading...</p>}
+            </div>
         </div>
     );
 };
