@@ -11,13 +11,13 @@ public class BookService() : IBookService
 	public List<Book> GenerateBooks(BookRequest request)
 	{
 		var bookFaker = new Faker<Book>(request.Region)
-			.RuleFor(b => b.ISBN, f => f.Random.Bool() ? 
+			.RuleFor(b => b.ISBN, f => f.Random.Bool() ?
 				$"978-{f.Random.Number(10, 99)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(0, 9)}"
 				: $"{f.Random.Number(1, 9)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(0, 9)}")
-			.RuleFor(b => b.ImageUrl, f => f.Commerce.ProductName())
-			.RuleFor(b => b.Title, f => f.Image.PlaceImgUrl())
+			.RuleFor(b => b.ImageUrl, f => f.Image.PicsumUrl(720, 1080))
+			.RuleFor(b => b.Title, f => GenerateTitle(f, request.Region))
 			.RuleFor(b => b.Publisher, f => $"{f.Company.CompanyName()} - {f.Random.Number(1980, 2025)}")
-			.RuleFor(b => b.Authors, f => [.. 
+			.RuleFor(b => b.Authors, f => [..
 				Enumerable.Range(1, f.Random.Int(1, 3))
 				.Select(_ => f.Name.FullName())])
 			.RuleFor(b => b.Reviews, f => []);
@@ -28,7 +28,7 @@ public class BookService() : IBookService
 		for (int i = 0; i < request.PageSize; i++)
 		{
 			int index = startIndex + i + 1;
-			int seed = $"{request.Seed}-{index}".GetHashCode();
+			int seed = $"{request.Seed}-{request.Region}-{index}".GetHashCode();
 			bookFaker.UseSeed(seed);
 			Book book = bookFaker.Generate();
 			book.Index = index;
@@ -70,7 +70,7 @@ public class BookService() : IBookService
 			.UseSeed(seed);
 
 		List<Review> reviews = [];
-		int numberOfReviews = (int)Math.Floor(averageReviews); 
+		int numberOfReviews = (int)Math.Floor(averageReviews);
 
 		for (int i = 0; i < numberOfReviews; i++)
 		{
@@ -114,5 +114,45 @@ public class BookService() : IBookService
 		};
 
 		return string.Join(" ", sentences.OrderBy(_ => f.Random.Int(0, sentences.Count - 1)).Take(2));
+	}
+
+
+	private string GenerateTitle(Faker f, string region)
+	{
+		List<string> titleFormats = region switch
+		{
+			"fr" =>
+			[
+				"{Adjective} {Noun}",
+				"{Noun} de {Noun}",
+				"{Verb} le {Noun}",
+				"{Noun} dans {Place}",
+				"Le {Adjective} {Noun}"
+			],
+			"de" =>
+			[
+				"{Adjective} {Noun}",
+				"{Noun} von {Noun}",
+				"{Verb} das {Noun}",
+				"{Noun} in {Place}",
+				"Der {Adjective} {Noun}"
+			],
+			_ =>
+			[
+				"{Adjective} {Noun}",
+				"{Noun} of {Noun}",
+				"{Verb} the {Noun}",
+				"{Noun} in {Place}",
+				"The {Adjective} {Noun}"
+			],
+		};
+
+		var selectedFormat = f.PickRandom(titleFormats);
+
+		return selectedFormat
+			.Replace("{Adjective}", f.Commerce.ProductAdjective())
+			.Replace("{Noun}", f.Commerce.ProductAdjective())
+			.Replace("{Verb}", f.Hacker.Verb())
+			.Replace("{Place}", f.Address.City());
 	}
 }

@@ -98,7 +98,89 @@ h4 {
     color: #2980b9;
 }
 
-p {
-    text-align: center;
+.expanded-book {
+    display: flex;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+    .expanded-book h2 {
+        font-size: 36px;
+        margin: 2px;
+    }
+    .expanded-book h3 {
+        font-size: 20px;
+        margin: 2px;
+        margin-top: 10px;
+    }
+    .expanded-book h4 {
+        font-size: 18px;
+        margin: 2px;
+        color: #555;
+    }
+
+.publisher {
+    font-size: 16px;
+    margin-bottom: 12px;
     font-style: italic;
+    margin: 2px;
+    color: #777;
+}
+
+
+.book-details {
+    flex: 1;
+}
+
+.review {
+    font-size: 16px;
+    margin: 10px;
+}
+
+.review-text {
+    margin: 0;
+}
+
+.reviewer {
+    padding: 0px 10px;
+    margin: 0;
+    font-style: italic;
+    color: #777;
+}
+
+.image-container {
+    position: relative;
+    margin: 10px;
+    max-height: 225px;
+}
+    .image-container img {
+        border-radius: 8px;
+        max-width: 150px;
+        max-height: 250px;
+        margin-right: 10px;
+        margin: 0;
+    }
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; 
+    padding: 10px;
+    border-radius: 8px; /* Match the image corners */
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.3s; /* Transition for fade effect */
+}
+
+.image-container:hover .overlay {
+    opacity: 0.8;
 }

@@ -179,14 +179,26 @@ export const App = () => {
                                 {expandedIndex === index && (
                                     <tr>
                                         <td colSpan="5">
-                                            <div>
-                                                <h3>Likes: {book.likes}</h3>
-                                                <h4>Reviews:</h4>
-                                                {book.reviews.map((review, idx) => (
-                                                    <div key={idx}>
-                                                        <strong>{review.reviewer}:</strong> {review.text}
+                                            <div className="expanded-book">
+                                                <div className="image-container">
+                                                    <img src={book.imageUrl} alt={`${book.title} cover`} />
+                                                    <div className="overlay">
+                                                        <h3>{book.title}</h3>
+                                                        <h5>by {book.authors.join(", ")}</h5>
                                                     </div>
-                                                ))}
+                                                </div>
+                                                <div className="book-details">
+                                                    <h2>{book.title}</h2>
+                                                    <h4>by {book.authors.join(", ")}</h4>
+                                                    <p className="publisher">Published by {book.publisher}</p>
+                                                    <h3>Reviews:</h3>
+                                                    {book.reviews.map((review, idx) => (
+                                                        <div className="review" key={idx} >
+                                                            <p className="review-text">{review.text}</p>
+                                                            <p className="reviewer">- {review.reviewer}:</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
