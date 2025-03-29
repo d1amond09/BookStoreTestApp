@@ -81,6 +81,38 @@ export const App = () => {
         }
     };
 
+    const fetchExportToCsv = async () => {
+        const lastPage = page === 1 ? page + 1 : page;
+        const params = new URLSearchParams({
+            region,
+            seed,
+            likesAvg,
+            reviewsAvg,
+            page: lastPage,
+            pageSize: BOOKS_PAGE_SIZE
+        });
+        fetch(`https://localhost:7086/api/books/export-csv?${params}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.blob(); 
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'books.csv';
+                document.body.appendChild(a);
+                a.click(); 
+                window.URL.revokeObjectURL(url); 
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    };
+
     const fetchRandomSeed = async () => {
         try {
             const response = await fetch(`https://localhost:7086/api/books/random-seed`);
@@ -153,6 +185,9 @@ export const App = () => {
                         value={reviewsAvg} min="0" step="0.1"
                         onChange={(e) => setReviewsAvg(parseFloat(e.target.value))} />
 
+                </div>
+                <div className="filter">
+                    <button className="random-button" onClick={fetchExportToCsv}>Export to CSV</button>
                 </div>
             </div>
             <div className="table">
