@@ -14,7 +14,8 @@ public class BookService() : IBookService
 			.RuleFor(b => b.ISBN, f => f.Random.Bool() ? 
 				$"978-{f.Random.Number(10, 99)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(0, 9)}"
 				: $"{f.Random.Number(1, 9)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(0, 9)}")
-			.RuleFor(b => b.Title, f => f.Commerce.ProductName())
+			.RuleFor(b => b.ImageUrl, f => f.Commerce.ProductName())
+			.RuleFor(b => b.Title, f => f.Image.PlaceImgUrl())
 			.RuleFor(b => b.Publisher, f => $"{f.Company.CompanyName()} - {f.Random.Number(1980, 2025)}")
 			.RuleFor(b => b.Authors, f => [.. 
 				Enumerable.Range(1, f.Random.Int(1, 3))
@@ -94,35 +95,24 @@ public class BookService() : IBookService
 					$"Die Handlung war {f.Commerce.ProductAdjective()}, und die Charaktere waren {f.Commerce.ProductAdjective()}.",
 					$"Ich empfehle dieses Buch jedem, der {f.Commerce.ProductAdjective()} Geschichten mag.",
 					$"Dieses Buch ist ein großartiges Beispiel für {f.Commerce.ProductAdjective()} Schreiben.",
-					$"Ich war {GetRandomEmotion(f, region)} vom {f.Commerce.ProductAdjective()} Ende."
+					$"Ich war beeindruckt vom {f.Commerce.ProductAdjective()} Ende."
 			],
 			"fr" => [
 					$"J'ai trouvé ce livre {f.Commerce.ProductAdjective()} et {f.Commerce.ProductAdjective()}.",
 					$"L'intrigue était {f.Commerce.ProductAdjective()}, et les personnages étaient {f.Commerce.ProductAdjective()}.",
 					$"Je recommande vivement ce livre à tous ceux qui aiment les histoires {f.Commerce.ProductAdjective()}.",
 					$"Ce livre est un excellent exemple d'écriture {f.Commerce.ProductAdjective()}.",
-					$"J'ai été {GetRandomEmotion(f, region)} par la fin {f.Commerce.ProductAdjective()}."
+					$"J'ai été impressionné par la fin {f.Commerce.ProductAdjective()}."
 			],
 			_ => [
 					$"I found this book to be {f.Commerce.ProductAdjective()} and {f.Commerce.ProductAdjective()}.",
 					$"The storyline was {f.Commerce.ProductAdjective()}, and the characters were {f.Commerce.ProductAdjective()}.",
 					$"I highly recommend this book for anyone who enjoys {f.Commerce.ProductAdjective()} stories.",
 					$"This book is a great example of {f.Commerce.ProductAdjective()} writing.",
-					$"I was {GetRandomEmotion(f, region)} by the {f.Commerce.ProductAdjective()} ending."
+					$"I was impressed by the {f.Commerce.ProductAdjective()} ending."
 			],
 		};
 
 		return string.Join(" ", sentences.OrderBy(_ => f.Random.Int(0, sentences.Count - 1)).Take(2));
-	}
-
-
-	private string GetRandomEmotion(Faker f, string region)
-	{
-		return region switch
-		{
-			"de" => f.Random.Bool() ? "beeindruckt" : "enttäuscht",
-			"fr" => f.Random.Bool() ? "impressionné" : "déçu",
-			_ => f.Random.Bool() ? "impressed" : "disappointed",
-		};
 	}
 }
