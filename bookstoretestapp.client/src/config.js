@@ -1,1 +1,1 @@
-export const BOOKS_API = "https://localhost:7086/api/books";
+export const BOOKS_API = "https://d1amond-book-store-test-app.runasp.net/api/books";
