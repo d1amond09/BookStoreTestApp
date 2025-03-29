@@ -14,7 +14,6 @@ public class BookService() : IBookService
 			.RuleFor(b => b.ISBN, f => f.Random.Bool() ?
 				$"978-{f.Random.Number(10, 99)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(0, 9)}"
 				: $"{f.Random.Number(1, 9)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(10000, 99999)}-{f.Random.Number(0, 9)}")
-			.RuleFor(b => b.ImageUrl, f => f.Image.PicsumUrl(720, 1080))
 			.RuleFor(b => b.Title, f => GenerateTitle(f, request.Region))
 			.RuleFor(b => b.Publisher, f => $"{f.Company.CompanyName()} - {f.Random.Number(1980, 2025)}")
 			.RuleFor(b => b.Authors, f => [..
@@ -32,6 +31,7 @@ public class BookService() : IBookService
 			bookFaker.UseSeed(seed);
 			Book book = bookFaker.Generate();
 			book.Index = index;
+			book.ImageUrl = GenerateRandomImageUrl(seed, book.Title);
 			book.Likes = GenerateLikes(seed, request.LikesAvg);
 			book.Reviews = GenerateReviews(seed, request.Region, request.ReviewsAvg);
 			books.Add(book);
@@ -154,5 +154,15 @@ public class BookService() : IBookService
 			.Replace("{Noun}", f.Commerce.ProductAdjective())
 			.Replace("{Verb}", f.Hacker.Verb())
 			.Replace("{Place}", f.Address.City());
+	}
+
+	public string GenerateRandomImageUrl(int seed, string title)
+	{
+		var r = new Random(seed).Next(9);
+		var g = new Random(seed).Next(9);
+		var b = new Random(seed).Next(9);
+		string rgb = $"{r}{g}{b}";
+
+		return $"https://dummyimage.com/verticalrectangle/{rgb}/fff&text={title}";
 	}
 }
