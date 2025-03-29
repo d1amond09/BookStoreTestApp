@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { BOOKS_API } from "./config.js";
 import "./App.css";
 
 
@@ -61,7 +62,7 @@ export const App = () => {
                 page: pageNumber - 1,
                 pageSize
             });
-            const response = await fetch(`https://localhost:7086/api/books?${params}`);
+            const response = await fetch(`${BOOKS_API}?${params}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -91,7 +92,7 @@ export const App = () => {
             page: lastPage,
             pageSize: BOOKS_PAGE_SIZE
         });
-        fetch(`https://localhost:7086/api/books/export-csv?${params}`)
+        fetch(`${BOOKS_API}/export-csv?${params}`)
             .then(response => {
                 if (response.ok) {
                     return response.blob(); 
@@ -115,7 +116,7 @@ export const App = () => {
 
     const fetchRandomSeed = async () => {
         try {
-            const response = await fetch(`https://localhost:7086/api/books/random-seed`);
+            const response = await fetch(`${BOOKS_API}/random-seed`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
