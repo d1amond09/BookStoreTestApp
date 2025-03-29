@@ -180,15 +180,20 @@ export const App = () => {
                                     <tr>
                                         <td colSpan="5">
                                             <div className="expanded-book">
-                                                <div className="image-container">
-                                                    <img src={book.imageUrl} alt={`${book.title} cover`} />
-                                                    <div className="overlay">
-                                                        <h3>{book.title}</h3>
-                                                        <h5>by {book.authors.join(", ")}</h5>
+                                                <div>
+                                                    <div className="image-container">
+                                                        <img src={book.imageUrl} alt={`${book.title} cover`} />
+                                                        <div className="overlay">
+                                                            <h3>{book.title}</h3>
+                                                            <h5>by {book.authors.join(", ")}</h5>
+                                                        </div>
+                                                    </div>
+                                                    <div className="likes">
+                                                        <h2> {book.likes}&#128077;</h2>
                                                     </div>
                                                 </div>
                                                 <div className="book-details">
-                                                    <h2>{book.title}</h2>
+                                                    <h2>{book.title} </h2>
                                                     <h4>by {book.authors.join(", ")}</h4>
                                                     <p className="publisher">Published by {book.publisher}</p>
                                                     <h3>Reviews:</h3>
